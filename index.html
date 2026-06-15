@@ -104,7 +104,6 @@
             margin-bottom: 12px;
         }
 
-        /* 範囲指定入力エリア用のスタイル */
         .range-input-group {
             display: flex;
             align-items: center;
@@ -306,12 +305,10 @@
     let selectedCount = 10;
     let isRandomOrder = true;
 
-    // 🌟 問題数に合わせて初期値を1〜100に固定しました
     let startQuestionId = 1;
     let endQuestionId = 100;
 
     async function initApp() {
-        // 🌟 タイトルを「はりきゅう理論」に変更
         document.getElementById('main-container').innerHTML = '<h1>はりきゅう理論</h1><div class="subtitle">読み込み中...</div>';
         try {
             const response = await fetch('data.csv');
@@ -327,41 +324,54 @@
 
     function parseCSV(text) {
         allQuestions = [];
-        const matches = text.matchAll(/(?:"([^"]*(?:""[^"]*)*)"|([^",\r\n]*))\s*(?:, |[\,])?|(\r?\n)/g);
-        let currentRow = [];
+        const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
         
-        for (const match of matches) {
-            if (match[3] !== undefined) {
-                processRow(currentRow);
-                currentRow = [];
-                continue;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            let parts = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let j = 0; j < line.length; j++) {
+                const char = line[j];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    parts.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
             }
-            let value = (match[1] !== undefined) ? match[1].replace(/""/g, '"') : match[2];
-            value = value ? value.trim() : '';
-            currentRow.push(value);
+            parts.push(current.trim());
+
+            if (parts.length < 7) continue;
+            if (parts[0].includes('問題番号') || parts[0].includes('id')) continue;
+
+            const rawId = parts[0];
+            if (!rawId) continue;
+
+            const numericId = parseInt(rawId.replace(/[^0-9]/g, ''), 10);
+            const id = isNaN(numericId) ? i : numericId;
+
+            const question = parts[1];
+            // 空白の選択肢を取り除くガード
+            const options = [parts[2], parts[3], parts[4], parts[5]].filter(opt => opt !== undefined && opt !== "");
+            const correct = parseInt(parts[6], 10) || 1;
+            
+            // 🌟 7列目以降（解説文の中にカンマが含まれて分裂してしまった分）をすべて結合する超防衛処理
+            const explanation = parts.length >= 8 ? parts.slice(7).join(', ') : '解説はありません。';
+
+            // 最低限4つの選択肢が揃っている場合のみ登録する
+            if(options.length >= 4) {
+                allQuestions.push({ id, rawId, question, options, correct, explanation });
+            }
         }
-        if (currentRow.length > 0) {
-            processRow(currentRow);
-        }
-    }
-
-    function processRow(parts) {
-        if (parts.length < 7) return;
-        if (parts[0].includes('問題番号') || parts[0].includes('id')) return;
-
-        const id = parts[0].trim();
-        if (!id) return;
-
-        const question = parts[1].trim();
-        const options = [parts[2].trim(), parts[3].trim(), parts[4].trim(), parts[5].trim()];
-        const correct = parseInt(parts[6].trim(), 10);
-        const explanation = parts.length >= 8 ? parts.slice(7).join(' ').trim() : '解説はありません。';
-
-        allQuestions.push({ id, question, options, correct, explanation });
     }
 
     function renderMenu() {
-        // 🌟 画面上の入力ボックスの値を常に最新の変数と同期させるため、inputイベントの処理を最適化
         const container = document.getElementById('main-container');
         container.innerHTML = `
             <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="portal-back-btn">
@@ -374,9 +384,9 @@
             <div class="section-box">
                 <div class="section-title">出題範囲（問番号で指定）</div>
                 <div class="range-input-group">
-                    <input type="number" class="range-number-input" id="range-start" value="${startQuestionId}" min="1" max="100" oninput="startQuestionId = parseInt(this.value) || 1">
+                    <input type="number" class="range-number-input" id="range-start" value="${startQuestionId}" min="1" oninput="startQuestionId = parseInt(this.value) || 1">
                     <span class="range-separator">～</span>
-                    <input type="number" class="range-number-input" id="range-end" value="${endQuestionId}" min="1" max="100" oninput="endQuestionId = parseInt(this.value) || 100">
+                    <input type="number" class="range-number-input" id="range-end" value="${endQuestionId}" min="1" oninput="endQuestionId = parseInt(this.value) || 100">
                 </div>
             </div>
 
@@ -412,14 +422,12 @@
         const minId = Math.min(startQuestionId, endQuestionId);
         const maxId = Math.max(startQuestionId, endQuestionId);
 
-        // 🌟 指定された範囲（1〜5など）で確実にフィルタリングできるように修正
         selectedQuestions = allQuestions.filter(item => {
-            const currentIdNum = parseInt(item.id);
-            return currentIdNum >= minId && currentIdNum <= maxId;
+            return item.id >= minId && item.id <= maxId;
         });
 
         if(selectedQuestions.length === 0) {
-            alert(`指定された範囲（問 ${minId} ～ 問 ${maxId}）に該当する問題が見つかりませんでした。データを確認してください。`);
+            alert(`指定された範囲（問 ${minId} ～ 問 ${maxId}）に該当する問題が見つかりませんでした。\n\ndata.csvファイル内の問題番号（1列目）が正しく読み込めていない可能性があります。`);
             return;
         }
 
@@ -429,7 +437,7 @@
                 [selectedQuestions[i], selectedQuestions[j]] = [selectedQuestions[j], selectedQuestions[i]];
             }
         } else {
-            selectedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+            selectedQuestions.sort((a, b) => a.id - b.id);
         }
 
         const limit = parseInt(document.getElementById('count-select').value);
@@ -458,13 +466,13 @@
             
             <div class="question-card">
                 <div class="top-badge">国試過去問 演習</div>
-                <div class="main-tag">【問 ${q.id}】</div>
+                <div class="main-tag">【問 ${q.rawId}】</div>
                 <div class="question-text">${q.question}</div>
             </div>
             
             <div class="options-list">
                 ${q.options.map((opt, idx) => `
-                    <button class="option-btn" onclick="checkAnswer(${idx + 1})">${opt}</button>
+                    <button class="option-btn" onclick="checkAnswer(${idx + 1})">${idx + 1}. ${opt}</button>
                 `).join('')}
             </div>
 
