@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AcuTheory - 国試対策演習マスター</title>
+    <title>AcuTheory - 4択演習マスター</title>
     <style>
         :root {
-            --primary-color: #34495e;
-            --accent-color: #3498db;
+            --primary-color: #1e293b;
+            --accent-color: #e67e22; /* 臨床医学各論に近いオレンジ */
             --success-color: #2ecc71;
             --error-color: #e74c3c;
-            --bg-color: #f0f4f8;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
+            --border-color: #e2e8f0;
         }
 
         body {
@@ -27,106 +28,210 @@
         }
 
         .container {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 650px;
-            padding: 30px;
+            max-width: 700px;
             box-sizing: border-box;
         }
 
+        /* 1枚目のような「中断してメニューへ」ボタンのスタイル */
+        .nav-btn {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            display: block;
+            margin: 0 auto 30px auto;
+            width: fit-content;
+        }
+        .nav-btn:hover {
+            background: #f1f5f9;
+        }
+
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             text-align: center;
             margin: 0 0 5px 0;
             color: var(--primary-color);
+            letter-spacing: 2px;
         }
 
         .subtitle {
             text-align: center;
             font-size: 0.85rem;
-            color: #7f8c8d;
+            color: #64748b;
             margin-bottom: 25px;
         }
 
+        /* メニュー画面のボックスデザイン */
         .section-box {
-            background: #fff;
-            border: 1px solid #e2e8f0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
         }
 
         .section-title {
             font-weight: bold;
             font-size: 0.95rem;
+            color: #475569;
             margin-bottom: 12px;
         }
 
         .order-btn {
             background: #fff;
-            border: 2px solid #cbd5e1;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            padding: 12px;
-            font-size: 0.9rem;
+            padding: 14px;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
-            font-weight: 500;
+            font-weight: bold;
+            color: #64748b;
         }
 
         .order-btn.active {
-            background: #e0f2fe;
+            background: #fff7ed;
             border-color: var(--accent-color);
             color: var(--accent-color);
-            font-weight: bold;
         }
 
-        /* セレクトボックス */
         .custom-select {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             font-size: 0.95rem;
-            border: 2px solid #cbd5e1;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
             outline: none;
             background: #fff;
+            color: #334155;
+            font-weight: 500;
         }
 
-        /* スタートボタン */
         .primary-btn {
             display: block;
             width: 100%;
             background: var(--accent-color);
             color: white;
             border: none;
-            padding: 15px;
+            padding: 16px;
             font-size: 1.05rem;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             transition: background 0.2s;
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.15);
+        }
+        .primary-btn:hover { background: #d35400; }
+
+        /* クイズ画面（MedBlank風カード） */
+        .quiz-progress {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
 
-        .primary-btn:hover { background: #2980b9; }
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            text-align: center; /* 1枚目のように中央寄せ */
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.02);
+        }
 
-        /* クイズ画面用のスタイル */
-        .quiz-progress { font-size: 0.85rem; color: #7f8c8d; text-align: right; margin-bottom: 10px; font-weight: bold;}
-        .question-box { font-size: 1.1rem; font-weight: bold; line-height: 1.6; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent-color); }
-        .options-list { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn { background: #fff; border: 2px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
-        .option-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #cbd5e1; }
-        .option-btn.correct { background-color: #d4edda; border-color: var(--success-color); color: #155724; font-weight: bold; }
-        .option-btn.wrong { background-color: #f8d7da; border-color: var(--error-color); color: #721c24; }
-        
-        .result-area { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; border-left: 5px solid; }
-        .result-area.correct-box { background: #e8f5e9; border-color: var(--success-color); color: #2e7d32; }
-        .result-area.wrong-box { background: #ffebee; border-color: var(--error-color); color: #c62828; }
-        .result-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
+        .top-badge {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
 
-        .nav-btn { background: #fff; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 5px; }
+        .main-tag {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #fed7aa;
+            padding-bottom: 15px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1.7;
+            color: #1e293b;
+            margin: 10px 0 0 0;
+        }
+
+        /* 選択肢リスト（幅いっぱいでシンプルな枠線） */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 1.05rem;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+        }
+        .option-btn:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        /* 正解・不正解（1枚目のように枠内を綺麗に色付け） */
+        .option-btn.correct {
+            background-color: #e8f5e9 !important;
+            border-color: var(--success-color) !important;
+            color: #1b5e20 !important;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #fde8e8 !important;
+            border-color: var(--error-color) !important;
+            color: #9b1c1c !important;
+        }
+
+        /* 解説エリア */
+        .result-area {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            background: #fff7ed;
+            border: 1px solid #ffedd5;
+        }
+        .result-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        .result-area.correct-box .result-title { color: var(--success-color); }
+        .result-area.wrong-box .result-title { color: var(--error-color); }
     </style>
 </head>
 <body>
@@ -135,15 +240,14 @@
     </div>
 
 <script>
-    let allQuestions = [];      // CSVから読み込んだ全データ
-    let selectedQuestions = []; // 条件に絞り込んだ出題用データ
+    let allQuestions = [];
+    let selectedQuestions = [];
     let currentIdx = 0;
     let selectedCount = 10;
     let isRandomOrder = true;
 
-    // 最初に起動する関数
     async function initApp() {
-        showMenuSkeleton();
+        document.getElementById('main-container').innerHTML = '<h1>東洋医学・生理学</h1><div class="subtitle">読み込み中...</div>';
         try {
             const response = await fetch('data.csv');
             if (!response.ok) throw new Error('data.csv が読み込めません');
@@ -155,12 +259,6 @@
         }
     }
 
-    // ローディング表示
-    function showMenuSkeleton() {
-        document.getElementById('main-container').innerHTML = '<h1>国試対策 演習</h1><div class="subtitle">データを読み込み中...</div>';
-    }
-
-    // CSVパース（標準の構成：ID, 問題文, 選択肢1-4, 正解番号, 解説）
     function parseCSV(text) {
         const lines = text.split(/\r?\n/);
         allQuestions = [];
@@ -168,7 +266,7 @@
         for(let i = 1; i < lines.length; i++) {
             if(!lines[i].trim()) continue;
             const parts = lines[i].split(',');
-            if(parts.length < 7) continue; // 最低限の列数が足りない場合はスキップ
+            if(parts.length < 7) continue;
 
             const explanation = parts.slice(6).join(',') || '解説はありません。';
 
@@ -182,12 +280,11 @@
         }
     }
 
-    // メニュー画面の描画
     function renderMenu() {
         const container = document.getElementById('main-container');
         container.innerHTML = `
-            <h1>国試対策 演習</h1>
-            <div class="subtitle">定期試験対策・高速4択マスター</div>
+            <h1>東洋医学・生理学</h1>
+            <div class="subtitle">4択演習マスター</div>
 
             <div class="section-box">
                 <div class="section-title">問題数</div>
@@ -202,7 +299,7 @@
 
             <div class="section-box">
                 <div class="section-title">出題順序</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <button class="order-btn ${isRandomOrder ? 'active' : ''}" onclick="setOrder(true)">ランダム</button>
                     <button class="order-btn ${!isRandomOrder ? 'active' : ''}" onclick="setOrder(false)">問題番号順</button>
                 </div>
@@ -212,23 +309,15 @@
         `;
     }
 
-    // 出題順序の切り替え
     function setOrder(random) {
         isRandomOrder = random;
         renderMenu();
     }
 
-    // クイズの構築と開始
     function startQuiz() {
-        // 全問題をコピー
         selectedQuestions = [...allQuestions];
+        if(selectedQuestions.length === 0) return;
 
-        if(selectedQuestions.length === 0) {
-            alert('問題データがありません。');
-            return;
-        }
-
-        // 順序の処理
         if (isRandomOrder) {
             for (let i = selectedQuestions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -238,7 +327,6 @@
             selectedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
         }
 
-        // 問題数の切り出し
         const limit = parseInt(document.getElementById('count-select').value);
         if(selectedQuestions.length > limit) {
             selectedQuestions = selectedQuestions.slice(0, limit);
@@ -248,31 +336,34 @@
         showQuestion();
     }
 
-    // 問題を表示する画面
     function showQuestion() {
         const container = document.getElementById('main-container');
         const q = selectedQuestions[currentIdx];
 
         container.innerHTML = `
-            <button class="nav-btn" onclick="location.reload()">↩ 中断してメニューへ</button>
+            <button class="nav-btn" onclick="location.reload()">🎵 中断してメニューへ</button>
             <div class="quiz-progress">問題 ${currentIdx + 1} / ${selectedQuestions.length}</div>
-            <div class="question-box">【問 ${q.id}】<br>${q.question}</div>
+            
+            <div class="question-card">
+                <div class="top-badge">国試過去問 演習</div>
+                <div class="main-tag">【問 ${q.id}】</div>
+                <div class="question-text">${q.question}</div>
+            </div>
             
             <div class="options-list">
                 ${q.options.map((opt, idx) => `
-                    <button class="option-btn" onclick="checkAnswer(${idx + 1})">${idx + 1}. ${opt}</button>
+                    <button class="option-btn" onclick="checkAnswer(${idx + 1})">${opt}</button>
                 `).join('')}
             </div>
 
             <div id="result-box" class="result-area">
                 <div id="result-title" class="result-title"></div>
-                <div style="margin-top:5px; font-size:0.9rem;"><strong>解説:</strong> ${q.explanation}</div>
-                <button class="primary-btn" style="margin-top:15px; padding:12px;" onclick="nextQuestion()">次へ進む</button>
+                <div style="margin-top:5px; font-size:0.95rem; line-height:1.6; color:#475569;"><strong>解説:</strong> ${q.explanation}</div>
+                <button class="primary-btn" style="margin-top:20px; padding:14px;" onclick="nextQuestion()">次へ進む</button>
             </div>
         `;
     }
 
-    // 判定処理
     function checkAnswer(selected) {
         const q = selectedQuestions[currentIdx];
         const buttons = document.querySelectorAll('.option-btn');
@@ -295,23 +386,21 @@
         resultBox.style.display = 'block';
     }
 
-    // 次へ
     function nextQuestion() {
         currentIdx++;
         if(currentIdx < selectedQuestions.length) {
             showQuestion();
         } else {
             document.getElementById('main-container').innerHTML = `
-                <div style="text-align:center; padding:20px;">
+                <div class="question-card" style="padding:40px 20px;">
                     <h2 style="color:var(--success-color); margin-top:0;">演習修了！</h2>
-                    <p>設定されたすべての問題を解き終えました。</p>
-                    <button class="primary-btn" onclick="location.reload()">メニューに戻る</button>
+                    <p style="color:#64748b;">お疲れ様でした！この調子で繰り返し復習しましょう。</p>
+                    <button class="primary-btn" style="margin-top:20px;" onclick="location.reload()">メニューに戻る</button>
                 </div>
             `;
         }
     }
 
-    // アプリ起動
     window.onload = initApp;
 </script>
 
