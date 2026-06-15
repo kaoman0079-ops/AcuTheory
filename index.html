@@ -416,11 +416,9 @@
     }
 
     function startQuiz() {
-        // 入力された数値の整合性をチェック
         const minId = Math.min(startQuestionId, endQuestionId);
         const maxId = Math.max(startQuestionId, endQuestionId);
 
-        // 🌟 指定された範囲内の問題だけをフィルターで抽出
         selectedQuestions = allQuestions.filter(item => {
             const currentIdNum = parseInt(item.id);
             return currentIdNum >= minId && currentIdNum <= maxId;
@@ -431,7 +429,6 @@
             return;
         }
 
-        // 順序の並び替え
         if (isRandomOrder) {
             for (let i = selectedQuestions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -441,7 +438,6 @@
             selectedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
         }
 
-        // 出題数の制限
         const limit = parseInt(document.getElementById('count-select').value);
         if(selectedQuestions.length > limit) {
             selectedQuestions = selectedQuestions.slice(0, limit);
@@ -486,6 +482,50 @@
         `;
     }
 
+    // 🌟 途切れていた関数の処理を綺麗に復元・修正しました
     function checkAnswer(selected) {
         const q = selectedQuestions[currentIdx];
-        const buttons = document
+        const buttons = document.querySelectorAll('.option-btn');
+        const resultBox = document.getElementById('result-box');
+        const resultTitle = document.getElementById('result-title');
+
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if(idx + 1 === q.correct) btn.classList.add('correct');
+        });
+
+        if(selected === q.correct) {
+            score++;
+            resultBox.className = "result-area correct-box";
+            resultTitle.innerText = "正解！ ⭕";
+        } else {
+            resultBox.className = "result-area wrong-box";
+            resultTitle.innerText = "不正解... ❌";
+            buttons[selected - 1].classList.add('wrong');
+        }
+        resultBox.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentIdx++;
+        if(currentIdx < selectedQuestions.length) {
+            showQuestion();
+        } else {
+            const percent = Math.round((score / selectedQuestions.length) * 100);
+            document.getElementById('main-container').innerHTML = `
+                <div class="question-card" style="padding:40px 20px;">
+                    <h2 style="color:var(--success-color); margin-top:0;">演習修了！ 🎉</h2>
+                    <div class="score-display">${score} / ${selectedQuestions.length} 問正解</div>
+                    <p style="font-weight: bold; color: #475569; margin-bottom: 20px;">正解率: ${percent}%</p>
+                    <p style="color:#64748b;">お疲れ様でした！この調子で繰り返し復習しましょう。</p>
+                    <button class="primary-btn" style="margin-top:20px;" onclick="renderMenu()">メニューに戻る</button>
+                </div>
+            `;
+        }
+    }
+
+    window.onload = initApp;
+</script>
+
+</body>
+</html>
