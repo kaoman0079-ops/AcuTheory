@@ -371,7 +371,8 @@
     function renderMenu() {
         const container = document.getElementById('main-container');
         container.innerHTML = `
-            <a href="index.html" class="portal-back-btn">
+            <!-- 🌟 戻るボタンのリンク先を独立したポータルサイトのURLに直接指定しました -->
+            <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="portal-back-btn">
                 <span>⏎</span> 東洋医学ポータル
             </a>
 
@@ -482,7 +483,6 @@
         `;
     }
 
-    // 🌟 途切れていた関数の処理を綺麗に復元・修正しました
     function checkAnswer(selected) {
         const q = selectedQuestions[currentIdx];
         const buttons = document.querySelectorAll('.option-btn');
