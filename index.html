@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnatoHack - 高速4択演習マスター</title>
+    <title>AcuTheory - 国試対策演習マスター</title>
     <style>
         :root {
             --primary-color: #34495e;
@@ -62,19 +62,9 @@
             font-weight: bold;
             font-size: 0.95rem;
             margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        /* カテゴリのグリッド配置 */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .cat-btn, .order-btn {
+        .order-btn {
             background: #fff;
             border: 2px solid #cbd5e1;
             border-radius: 8px;
@@ -86,7 +76,7 @@
             font-weight: 500;
         }
 
-        .cat-btn.active, .order-btn.active {
+        .order-btn.active {
             background: #e0f2fe;
             border-color: var(--accent-color);
             color: var(--accent-color);
@@ -102,15 +92,6 @@
             border-radius: 8px;
             outline: none;
             background: #fff;
-        }
-
-        .select-all-btn {
-            font-size: 0.8rem;
-            background: #e2e8f0;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
         }
 
         /* スタートボタン */
@@ -155,7 +136,6 @@
 
 <script>
     let allQuestions = [];      // CSVから読み込んだ全データ
-    let activeCategories = [];  // 選択されたカテゴリ
     let selectedQuestions = []; // 条件に絞り込んだ出題用データ
     let currentIdx = 0;
     let selectedCount = 10;
@@ -165,7 +145,7 @@
     async function initApp() {
         showMenuSkeleton();
         try {
-            const response = await fetch('data.csv'); // あなたのCSVファイル名
+            const response = await fetch('data.csv');
             if (!response.ok) throw new Error('data.csv が読み込めません');
             const text = await response.text();
             parseCSV(text);
@@ -175,12 +155,12 @@
         }
     }
 
-    // スケルトン（ローディング表示）
+    // ローディング表示
     function showMenuSkeleton() {
-        document.getElementById('main-container').innerHTML = '<h1>解剖学 演習</h1><div class="subtitle">データを読み込み中...</div>';
+        document.getElementById('main-container').innerHTML = '<h1>国試対策 演習</h1><div class="subtitle">データを読み込み中...</div>';
     }
 
-    // CSVパース（2列目をカテゴリとして取得）
+    // CSVパース（標準の構成：ID, 問題文, 選択肢1-4, 正解番号, 解説）
     function parseCSV(text) {
         const lines = text.split(/\r?\n/);
         allQuestions = [];
@@ -188,41 +168,26 @@
         for(let i = 1; i < lines.length; i++) {
             if(!lines[i].trim()) continue;
             const parts = lines[i].split(',');
-            if(parts.length < 8) continue; // 列数が足りない場合はスキップ
+            if(parts.length < 7) continue; // 最低限の列数が足りない場合はスキップ
+
+            const explanation = parts.slice(6).join(',') || '解説はありません。';
 
             allQuestions.push({
                 id: parts[0].trim(),
-                category: parts[1].trim(), // 2列目をカテゴリにする
-                question: parts[2].trim(),
-                options: [parts[3].trim(), parts[4].trim(), parts[5].trim(), parts[6].trim()],
-                correct: parseInt(parts[7].trim(), 10),
-                explanation: parts.slice(8).join(',') || '解説はありません。'
+                question: parts[1].trim(),
+                options: [parts[2].trim(), parts[3].trim(), parts[4].trim(), parts[5].trim()],
+                correct: parseInt(parts[6].trim(), 10),
+                explanation: explanation
             });
         }
     }
 
     // メニュー画面の描画
     function renderMenu() {
-        // 重複のないカテゴリリストを自動抽出
-        const categories = [...new Set(allQuestions.map(q => q.category))];
-        if(activeCategories.length === 0) activeCategories = [...categories]; // 初期値は全選択
-
         const container = document.getElementById('main-container');
         container.innerHTML = `
-            <h1>解剖学 演習</h1>
+            <h1>国試対策 演習</h1>
             <div class="subtitle">定期試験対策・高速4択マスター</div>
-
-            <div class="section-box">
-                <div class="section-title">
-                    <span>出題するカテゴリ</span>
-                    <button class="select-all-btn" onclick="toggleAllCategories(${JSON.stringify(categories).replace(/"/g, '&quot;')})">全選択/解除</button>
-                </div>
-                <div class="category-grid">
-                    ${categories.map(cat => `
-                        <button class="cat-btn ${activeCategories.includes(cat) ? 'active' : ''}" onclick="toggleCategory('${cat}')">${cat}</button>
-                    `).join('')}
-                </div>
-            </div>
 
             <div class="section-box">
                 <div class="section-title">問題数</div>
@@ -231,7 +196,7 @@
                     <option value="20" ${selectedCount == 20 ? 'selected' : ''}>20 問</option>
                     <option value="30" ${selectedCount == 30 ? 'selected' : ''}>30 問</option>
                     <option value="50" ${selectedCount == 50 ? 'selected' : ''}>50 問</option>
-                    <option value="1000" ${selectedCount == 1000 ? 'selected' : ''}>全問出題</option>
+                    <option value="1000" ${selectedCount == 1000 ? 'selected' : ''}>全問出題（${allQuestions.length}問）</option>
                 </select>
             </div>
 
@@ -247,26 +212,6 @@
         `;
     }
 
-    // カテゴリの個別選択切り替え
-    function toggleCategory(cat) {
-        if(activeCategories.includes(cat)) {
-            activeCategories = activeCategories.filter(c => c !== cat);
-        } else {
-            activeCategories.push(cat);
-        }
-        renderMenu();
-    }
-
-    // カテゴリの全選択・解除
-    function toggleAllCategories(allCats) {
-        if(activeCategories.length === allCats.length) {
-            activeCategories = [];
-        } else {
-            activeCategories = [...allCats];
-        }
-        renderMenu();
-    }
-
     // 出題順序の切り替え
     function setOrder(random) {
         isRandomOrder = random;
@@ -275,15 +220,15 @@
 
     // クイズの構築と開始
     function startQuiz() {
-        // 1. カテゴリで絞り込み
-        selectedQuestions = allQuestions.filter(q => activeCategories.includes(q.category));
+        // 全問題をコピー
+        selectedQuestions = [...allQuestions];
 
         if(selectedQuestions.length === 0) {
-            alert('カテゴリを1つ以上選択してください。');
+            alert('問題データがありません。');
             return;
         }
 
-        // 2. 順序の処理
+        // 順序の処理
         if (isRandomOrder) {
             for (let i = selectedQuestions.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -293,7 +238,7 @@
             selectedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
         }
 
-        // 3. 問題数の切り出し
+        // 問題数の切り出し
         const limit = parseInt(document.getElementById('count-select').value);
         if(selectedQuestions.length > limit) {
             selectedQuestions = selectedQuestions.slice(0, limit);
@@ -311,7 +256,6 @@
         container.innerHTML = `
             <button class="nav-btn" onclick="location.reload()">↩ 中断してメニューへ</button>
             <div class="quiz-progress">問題 ${currentIdx + 1} / ${selectedQuestions.length}</div>
-            <div style="font-size:0.85rem; color:var(--accent-color); font-weight:bold; margin-bottom:5px;">${q.category}</div>
             <div class="question-box">【問 ${q.id}】<br>${q.question}</div>
             
             <div class="options-list">
