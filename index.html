@@ -1,1 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鍼灸国家試験対策 - 東洋医学・生理学クイズ</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ec4b6;
+            --error-color: #e71d36;
+            --dark-color: #011627;
+            --light-color: #f6f7f8;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 10px;
+        }
+
+        .quiz-progress {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f0f7ff;
+            border-color: var(--primary-color);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        /* 正解・不正解のスタイル */
+        .option-btn.correct {
+            background-color: #e6f9f5;
+            border-color: var(--success-color);
+            color: #0e6251;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #ffebe6;
+            border-color: var(--error-color);
+            color: #780512;
+        }
+
+        /* 結果・解説エリア */
+        .result-area {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-area.correct-box {
+            background-color: #e6f9f5;
+            border-left: 5px solid var(--success-color);
+        }
+
+        .result-area.wrong-box {
+            background-color: #ffebe6;
+            border-left: 5px solid var(--error-color);
+        }
+
+        .result-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .result-area.correct-box .result-title { color: var(--success-color); }
+        .result-area.wrong-box .result-title { color: var(--error-color); }
+
+        .explanation-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #444;
+        }
+
+        .next-btn {
+            display: block;
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #357abd;
+        }
+
+        /* ローディング表示 */
+        .loading {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #666;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>国家試験対策 クイズ</h1>
+    <div id="quiz-box">
+        <div class="loading">問題を読み込んでいます...</div>
+    </div>
+</div>
+
+<script>
+    let quizData = [];
+    let currentQuestionIndex = 0;
+
+    // CSVファイルを読み込む関数
+    async function loadCSV() {
+        try {
+            const response = await fetch('data.csv');
+            if (!response.ok) throw new Error('data.csv が見つかりません。');
+            
+            const text = await response.text();
+            parseCSV(text);
+        } catch (error) {
+            document.getElementById('quiz-box').innerHTML = `
+                <div style="color:red; text-align:center; font-weight:bold;">
+                    エラー: ${error.message}<br>
+                    <span style="font-size:0.9rem; color:#666;">data.csvが同じリポジトリ内にあるか確認してください。</span>
+                </div>`;
+        }
+    }
+
+    // CSVの文字列を解析して配列に格納する関数
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/);
+        quizData = [];
+
+        // 1行目はヘッダーなので i=1 からスタート
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue; // 空行はスキップ
+
+            // カンマで分割（シンプルなCSVパース）
+            const parts = lines[i].split(',');
+            if (parts.length < 7) continue; // 列数が足りない場合はスキップ
+
+            // 解説部分にカンマが含まれている場合の結合処理
+            const explanation = parts.slice(7).join(',');
+
+            quizData.push({
+                id: parts[0],
+                question: parts[1],
+                options: [parts[2], parts[3], parts[4], parts[5]],
+                correct: parseInt(parts[6].trim(), 10),
+                explanation: explanation || '解説はありません。'
+            });
+        }
+
+        // 問題データをランダムにシャッフル
+        shuffleArray(quizData);
+
+        if (quizData.length > 0) {
+            showQuestion();
+        } else {
+            document.getElementById('quiz-box').innerHTML = '<div class="loading">有効な問題データがありません。</div>';
+        }
+    }
+
+    // 配列をシャッフルする（フィッシャー・イェーツ）
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // 問題画面を表示する関数
+    function showQuestion() {
+        const quizBox = document.getElementById('quiz-box');
+        const q = quizData[currentQuestionIndex];
+
+        quizBox.innerHTML = `
+            <div class="quiz-progress">問題 ${currentQuestionIndex + 1} / ${quizData.length}</div>
+            <div class="question-text">【問 ${q.id}】<br>${q.question}</div>
+            <div class="options-list">
+                <button class="option-btn" onclick="checkAnswer(1)">1. ${q.options[0]}</button>
+                <button class="option-btn" onclick="checkAnswer(2)">2. ${q.options[1]}</button>
+                <button class="option-btn" onclick="checkAnswer(3)">3. ${q.options[2]}</button>
+                <button class="option-btn" onclick="checkAnswer(4)">4. ${q.options[3]}</button>
+            </div>
+            <div id="result-box" class="result-area">
+                <div id="result-title" class="result-title"></div>
+                <div class="explanation-text"><strong>解説:</strong> <span id="explanation-content"></span></div>
+                <button class="next-btn" onclick="nextQuestion()">次の問題へ</button>
+            </div>
+        `;
+    }
+
+    // 回答をチェックする関数
+    function checkAnswer(selectedIdx) {
+        const q = quizData[currentQuestionIndex];
+        const buttons = document.querySelectorAll('.option-btn');
+        const resultBox = document.getElementById('result-box');
+        const resultTitle = document.getElementById('result-title');
+        const explanationContent = document.getElementById('explanation-content');
+
+        // すべてのボタンを無効化
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            // 正解の選択肢をハイライト
+            if (idx + 1 === q.correct) {
+                btn.classList.add('correct');
+            }
+        });
+
+        // 判定処理
+        if (selectedIdx === q.correct) {
+            resultBox.className = "result-area correct-box";
+            resultTitle.innerText = "正解！";
+        } else {
+            resultBox.className = "result-area wrong-box";
+            resultTitle.innerText = "不正解...";
+            buttons[selectedIdx - 1].classList.add('wrong');
+        }
+
+        // 解説を表示
+        explanationContent.innerText = q.explanation;
+        resultBox.style.display = 'block';
+    }
+
+    // 次の問題に進む関数
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            showQuestion();
+        } else {
+            // 全問終了時
+            document.getElementById('quiz-box').innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <h2 style="color:var(--primary-color);">全問終了です！</h2>
+                    <p>お疲れ様でした。何度も挑戦して知識を定着させましょう！</p>
+                    <button class="next-btn" onclick="location.reload()">もう一度最初から解く</button>
+                </div>
+            `;
+        }
+    }
+
+    // 起動時にCSVを読み込む
+    window.onload = loadCSV;
+</script>
+
+</body>
+</html>
 
