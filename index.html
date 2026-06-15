@@ -306,27 +306,19 @@
     let selectedCount = 10;
     let isRandomOrder = true;
 
-    // 範囲指定用の初期値を管理する変数
+    // 🌟 問題数に合わせて初期値を1〜100に固定しました
     let startQuestionId = 1;
-    let endQuestionId = 999;
+    let endQuestionId = 100;
 
     async function initApp() {
-        document.getElementById('main-container').innerHTML = '<h1>東洋医学・生理学</h1><div class="subtitle">読み込み中...</div>';
+        // 🌟 タイトルを「はりきゅう理論」に変更
+        document.getElementById('main-container').innerHTML = '<h1>はりきゅう理論</h1><div class="subtitle">読み込み中...</div>';
         try {
             const response = await fetch('data.csv');
             if (!response.ok) throw new Error('data.csv が読み込めません');
             const text = await response.text();
             parseCSV(text);
             
-            // CSV読み込み後に、実際の最大の問題番号を終了番号の初期値にする
-            if(allQuestions.length > 0) {
-                // IDの最大値を見つける
-                const ids = allQuestions.map(q => parseInt(q.id)).filter(id => !isNaN(id));
-                if(ids.length > 0) {
-                    endQuestionId = Math.max(...ids);
-                }
-            }
-
             renderMenu();
         } catch (e) {
             document.getElementById('main-container').innerHTML = `<p style="color:red; text-align:center;">${e.message}</p>`;
@@ -369,22 +361,22 @@
     }
 
     function renderMenu() {
+        // 🌟 画面上の入力ボックスの値を常に最新の変数と同期させるため、inputイベントの処理を最適化
         const container = document.getElementById('main-container');
         container.innerHTML = `
-            <!-- 🌟 戻るボタンのリンク先を独立したポータルサイトのURLに直接指定しました -->
             <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="portal-back-btn">
                 <span>⏎</span> 東洋医学ポータル
             </a>
 
-            <h1>東洋医学・生理学</h1>
+            <h1>はりきゅう理論</h1>
             <div class="subtitle">4択演習マスター</div>
 
             <div class="section-box">
                 <div class="section-title">出題範囲（問番号で指定）</div>
                 <div class="range-input-group">
-                    <input type="number" class="range-number-input" id="range-start" value="${startQuestionId}" min="1" onchange="startQuestionId = parseInt(this.value) || 1">
+                    <input type="number" class="range-number-input" id="range-start" value="${startQuestionId}" min="1" max="100" oninput="startQuestionId = parseInt(this.value) || 1">
                     <span class="range-separator">～</span>
-                    <input type="number" class="range-number-input" id="range-end" value="${endQuestionId}" min="1" onchange="endQuestionId = parseInt(this.value) || 999">
+                    <input type="number" class="range-number-input" id="range-end" value="${endQuestionId}" min="1" max="100" oninput="endQuestionId = parseInt(this.value) || 100">
                 </div>
             </div>
 
@@ -420,13 +412,14 @@
         const minId = Math.min(startQuestionId, endQuestionId);
         const maxId = Math.max(startQuestionId, endQuestionId);
 
+        // 🌟 指定された範囲（1〜5など）で確実にフィルタリングできるように修正
         selectedQuestions = allQuestions.filter(item => {
             const currentIdNum = parseInt(item.id);
             return currentIdNum >= minId && currentIdNum <= maxId;
         });
 
         if(selectedQuestions.length === 0) {
-            alert(`指定された範囲（問 ${minId} ～ 問 ${maxId}）に該当する問題が見つかりませんでした。番号をもう一度確認してください。`);
+            alert(`指定された範囲（問 ${minId} ～ 問 ${maxId}）に該当する問題が見つかりませんでした。データを確認してください。`);
             return;
         }
 
