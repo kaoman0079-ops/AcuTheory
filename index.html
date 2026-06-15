@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnatoHack - 国試対策クイズ</title>
+    <title>AnatoHack - 高速4択演習マスター</title>
     <style>
         :root {
-            --primary-color: #2c3e50;
+            --primary-color: #34495e;
             --accent-color: #3498db;
             --success-color: #2ecc71;
             --error-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
         }
 
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            background-color: #f5f7fa;
-            color: var(--dark-color);
+            background-color: var(--bg-color);
+            color: var(--primary-color);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -26,362 +26,349 @@
             min-height: 100vh;
         }
 
-        .quiz-container {
-            background-color: #ffffff;
+        .container {
+            background-color: var(--card-bg);
             border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             padding: 30px;
             box-sizing: border-box;
-            border-top: 6px solid var(--accent-color);
         }
 
         h1 {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             text-align: center;
+            margin: 0 0 5px 0;
             color: var(--primary-color);
-            margin-top: 0;
-            margin-bottom: 5px;
         }
 
         .subtitle {
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #7f8c8d;
             margin-bottom: 25px;
         }
 
-        /* セレクトボックスのスタイル */
-        .select-zone {
-            background-color: var(--light-color);
+        .section-box {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            text-align: center;
+            margin-bottom: 20px;
         }
 
-        .select-zone label {
-            display: block;
+        .section-title {
             font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
+        /* カテゴリのグリッド配置 */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .cat-btn, .order-btn {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .cat-btn.active, .order-btn.active {
+            background: #e0f2fe;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* セレクトボックス */
         .custom-select {
             width: 100%;
-            max-width: 300px;
-            padding: 10px 15px;
-            font-size: 1rem;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            background-color: white;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .custom-select:focus {
-            border-color: var(--accent-color);
-        }
-
-        .start-btn {
-            display: inline-block;
-            margin-top: 15px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .start-btn:hover {
-            background-color: #2980b9;
-        }
-
-        .quiz-progress {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-            text-align: right;
-            font-weight: bold;
-        }
-
-        .question-text {
-            font-size: 1.15rem;
-            font-weight: bold;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-
-        .option-btn {
-            background-color: #ffffff;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 14px 20px;
-            font-size: 1rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .option-btn:hover:not(:disabled) {
-            background-color: #edf2f7;
-            border-color: var(--accent-color);
-        }
-
-        .option-btn:disabled {
-            cursor: not-allowed;
-        }
-
-        /* 正解・不正解 */
-        .option-btn.correct {
-            background-color: #d4edda;
-            border-color: var(--success-color);
-            color: #155724;
-            font-weight: bold;
-        }
-
-        .option-btn.wrong {
-            background-color: #f8d7da;
-            border-color: var(--error-color);
-            color: #721c24;
-        }
-
-        /* 結果・解説 */
-        .result-area {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .result-area.correct-box {
-            background-color: #d4edda;
-            border-left: 5px solid var(--success-color);
-        }
-
-        .result-area.wrong-box {
-            background-color: #f8d7da;
-            border-left: 5px solid var(--error-color);
-        }
-
-        .result-title {
-            font-weight: bold;
-            font-size: 1.3rem;
-            margin-bottom: 8px;
-        }
-
-        .result-area.correct-box .result-title { color: var(--success-color); }
-        .result-area.wrong-box .result-title { color: var(--error-color); }
-
-        .explanation-text {
+            padding: 12px;
             font-size: 0.95rem;
-            line-height: 1.5;
-            color: #2c3e50;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            background: #fff;
         }
 
-        .next-btn {
+        .select-all-btn {
+            font-size: 0.8rem;
+            background: #e2e8f0;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* スタートボタン */
+        .primary-btn {
             display: block;
             width: 100%;
-            background-color: var(--primary-color);
-            color: #ffffff;
+            background: var(--accent-color);
+            color: white;
             border: none;
-            border-radius: 8px;
-            padding: 14px;
-            font-size: 1rem;
+            padding: 15px;
+            font-size: 1.05rem;
             font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
             transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
         }
 
-        .next-btn:hover {
-            background-color: #1a252f;
-        }
+        .primary-btn:hover { background: #2980b9; }
 
-        .loading {
-            text-align: center;
-            font-size: 1.1rem;
-            color: #666;
-            padding: 40px 0;
-        }
+        /* クイズ画面用のスタイル */
+        .quiz-progress { font-size: 0.85rem; color: #7f8c8d; text-align: right; margin-bottom: 10px; font-weight: bold;}
+        .question-box { font-size: 1.1rem; font-weight: bold; line-height: 1.6; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent-color); }
+        .options-list { display: flex; flex-direction: column; gap: 10px; }
+        .option-btn { background: #fff; border: 2px solid #e2e8f0; border-radius: 8px; padding: 14px; text-align: left; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .option-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #cbd5e1; }
+        .option-btn.correct { background-color: #d4edda; border-color: var(--success-color); color: #155724; font-weight: bold; }
+        .option-btn.wrong { background-color: #f8d7da; border-color: var(--error-color); color: #721c24; }
+        
+        .result-area { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; border-left: 5px solid; }
+        .result-area.correct-box { background: #e8f5e9; border-color: var(--success-color); color: #2e7d32; }
+        .result-area.wrong-box { background: #ffebee; border-color: var(--error-color); color: #c62828; }
+        .result-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; }
+
+        .nav-btn { background: #fff; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 5px; }
     </style>
 </head>
 <body>
 
-<div class="quiz-container">
-    <h1>AnatoHack</h1>
-    <div class="subtitle">国家試験対策 スマート学習アプリ</div>
-    
-    <div id="quiz-box">
-        <div class="select-zone">
-            <label for="quiz-select">📝 解く問題を選択してください</label>
-            <select id="quiz-select" class="custom-select">
-                <option value="data.csv">生理学・東洋医学（100問）</option>
-                <option value="anato.csv">解剖学・その他</option>
-            </select>
-            <br>
-            <button class="start-btn" onclick="loadSelectedCSV()">クイズをスタート</button>
-        </div>
+<div class="container" id="main-container">
     </div>
-</div>
 
 <script>
-    let quizData = [];
-    let currentQuestionIndex = 0;
+    let allQuestions = [];      // CSVから読み込んだ全データ
+    let activeCategories = [];  // 選択されたカテゴリ
+    let selectedQuestions = []; // 条件に絞り込んだ出題用データ
+    let currentIdx = 0;
+    let selectedCount = 10;
+    let isRandomOrder = true;
 
-    // 選択されたCSVファイルを読み込む関数
-    async function loadSelectedCSV() {
-        const selectElement = document.getElementById('quiz-select');
-        const selectedFile = selectElement.value;
-        
-        const quizBox = document.getElementById('quiz-box');
-        quizBox.innerHTML = '<div class="loading">問題を読み込んでいます...</div>';
-
+    // 最初に起動する関数
+    async function initApp() {
+        showMenuSkeleton();
         try {
-            const response = await fetch(selectedFile);
-            if (!response.ok) throw new Error(`${selectedFile} が見つかりません。`);
-            
+            const response = await fetch('data.csv'); // あなたのCSVファイル名
+            if (!response.ok) throw new Error('data.csv が読み込めません');
             const text = await response.text();
             parseCSV(text);
-        } catch (error) {
-            quizBox.innerHTML = `
-                <div style="color:red; text-align:center; font-weight:bold; padding: 20px;">
-                    エラー: ${error.message}<br>
-                    <span style="font-size:0.9rem; color:#666; font-weight:normal;">
-                        リポジトリ内に該当のCSVファイル（${selectedFile}）が正しく配置されているか確認してください。
-                    </span>
-                    <br><br>
-                    <button class="start-btn" onclick="location.reload()">戻る</button>
-                </div>`;
+            renderMenu();
+        } catch (e) {
+            document.getElementById('main-container').innerHTML = `<p style="color:red; text-align:center;">${e.message}</p>`;
         }
     }
 
-    // CSVの文字列を解析する関数
+    // スケルトン（ローディング表示）
+    function showMenuSkeleton() {
+        document.getElementById('main-container').innerHTML = '<h1>解剖学 演習</h1><div class="subtitle">データを読み込み中...</div>';
+    }
+
+    // CSVパース（2列目をカテゴリとして取得）
     function parseCSV(text) {
         const lines = text.split(/\r?\n/);
-        quizData = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            if (!lines[i].trim()) continue;
-
+        allQuestions = [];
+        
+        for(let i = 1; i < lines.length; i++) {
+            if(!lines[i].trim()) continue;
             const parts = lines[i].split(',');
-            if (parts.length < 7) continue;
+            if(parts.length < 8) continue; // 列数が足りない場合はスキップ
 
-            const explanation = parts.slice(7).join(',');
-
-            quizData.push({
-                id: parts[0],
-                question: parts[1],
-                options: [parts[2], parts[3], parts[4], parts[5]],
-                correct: parseInt(parts[6].trim(), 10),
-                explanation: explanation || '解説はありません。'
+            allQuestions.push({
+                id: parts[0].trim(),
+                category: parts[1].trim(), // 2列目をカテゴリにする
+                question: parts[2].trim(),
+                options: [parts[3].trim(), parts[4].trim(), parts[5].trim(), parts[6].trim()],
+                correct: parseInt(parts[7].trim(), 10),
+                explanation: parts.slice(8).join(',') || '解説はありません。'
             });
         }
-
-        // 問題をランダムにシャッフル
-        shuffleArray(quizData);
-
-        if (quizData.length > 0) {
-            currentQuestionIndex = 0;
-            showQuestion();
-        } else {
-            document.getElementById('quiz-box').innerHTML = `
-                <div class="loading">有効な問題データがありません。</div>
-                <button class="next-btn" onclick="location.reload()">選択画面に戻る</button>`;
-        }
     }
 
-    // 配列のシャッフル
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
+    // メニュー画面の描画
+    function renderMenu() {
+        // 重複のないカテゴリリストを自動抽出
+        const categories = [...new Set(allQuestions.map(q => q.category))];
+        if(activeCategories.length === 0) activeCategories = [...categories]; // 初期値は全選択
 
-    // 問題を表示
-    function showQuestion() {
-        const quizBox = document.getElementById('quiz-box');
-        const q = quizData[currentQuestionIndex];
+        const container = document.getElementById('main-container');
+        container.innerHTML = `
+            <h1>解剖学 演習</h1>
+            <div class="subtitle">定期試験対策・高速4択マスター</div>
 
-        quizBox.innerHTML = `
-            <div class="quiz-progress">問題 ${currentQuestionIndex + 1} / ${quizData.length}</div>
-            <div class="question-text">【問 ${q.id}】<br>${q.question}</div>
-            <div class="options-list">
-                <button class="option-btn" onclick="checkAnswer(1)">1. ${q.options[0]}</button>
-                <button class="option-btn" onclick="checkAnswer(2)">2. ${q.options[1]}</button>
-                <button class="option-btn" onclick="checkAnswer(3)">3. ${q.options[2]}</button>
-                <button class="option-btn" onclick="checkAnswer(4)">4. ${q.options[3]}</button>
+            <div class="section-box">
+                <div class="section-title">
+                    <span>出題するカテゴリ</span>
+                    <button class="select-all-btn" onclick="toggleAllCategories(${JSON.stringify(categories).replace(/"/g, '&quot;')})">全選択/解除</button>
+                </div>
+                <div class="category-grid">
+                    ${categories.map(cat => `
+                        <button class="cat-btn ${activeCategories.includes(cat) ? 'active' : ''}" onclick="toggleCategory('${cat}')">${cat}</button>
+                    `).join('')}
+                </div>
             </div>
+
+            <div class="section-box">
+                <div class="section-title">問題数</div>
+                <select class="custom-select" id="count-select" onchange="selectedCount = this.value">
+                    <option value="10" ${selectedCount == 10 ? 'selected' : ''}>10 問</option>
+                    <option value="20" ${selectedCount == 20 ? 'selected' : ''}>20 問</option>
+                    <option value="30" ${selectedCount == 30 ? 'selected' : ''}>30 問</option>
+                    <option value="50" ${selectedCount == 50 ? 'selected' : ''}>50 問</option>
+                    <option value="1000" ${selectedCount == 1000 ? 'selected' : ''}>全問出題</option>
+                </select>
+            </div>
+
+            <div class="section-box">
+                <div class="section-title">出題順序</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="order-btn ${isRandomOrder ? 'active' : ''}" onclick="setOrder(true)">ランダム</button>
+                    <button class="order-btn ${!isRandomOrder ? 'active' : ''}" onclick="setOrder(false)">問題番号順</button>
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="startQuiz()">演習を開始する</button>
+        `;
+    }
+
+    // カテゴリの個別選択切り替え
+    function toggleCategory(cat) {
+        if(activeCategories.includes(cat)) {
+            activeCategories = activeCategories.filter(c => c !== cat);
+        } else {
+            activeCategories.push(cat);
+        }
+        renderMenu();
+    }
+
+    // カテゴリの全選択・解除
+    function toggleAllCategories(allCats) {
+        if(activeCategories.length === allCats.length) {
+            activeCategories = [];
+        } else {
+            activeCategories = [...allCats];
+        }
+        renderMenu();
+    }
+
+    // 出題順序の切り替え
+    function setOrder(random) {
+        isRandomOrder = random;
+        renderMenu();
+    }
+
+    // クイズの構築と開始
+    function startQuiz() {
+        // 1. カテゴリで絞り込み
+        selectedQuestions = allQuestions.filter(q => activeCategories.includes(q.category));
+
+        if(selectedQuestions.length === 0) {
+            alert('カテゴリを1つ以上選択してください。');
+            return;
+        }
+
+        // 2. 順序の処理
+        if (isRandomOrder) {
+            for (let i = selectedQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [selectedQuestions[i], selectedQuestions[j]] = [selectedQuestions[j], selectedQuestions[i]];
+            }
+        } else {
+            selectedQuestions.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        }
+
+        // 3. 問題数の切り出し
+        const limit = parseInt(document.getElementById('count-select').value);
+        if(selectedQuestions.length > limit) {
+            selectedQuestions = selectedQuestions.slice(0, limit);
+        }
+
+        currentIdx = 0;
+        showQuestion();
+    }
+
+    // 問題を表示する画面
+    function showQuestion() {
+        const container = document.getElementById('main-container');
+        const q = selectedQuestions[currentIdx];
+
+        container.innerHTML = `
+            <button class="nav-btn" onclick="location.reload()">↩ 中断してメニューへ</button>
+            <div class="quiz-progress">問題 ${currentIdx + 1} / ${selectedQuestions.length}</div>
+            <div style="font-size:0.85rem; color:var(--accent-color); font-weight:bold; margin-bottom:5px;">${q.category}</div>
+            <div class="question-box">【問 ${q.id}】<br>${q.question}</div>
+            
+            <div class="options-list">
+                ${q.options.map((opt, idx) => `
+                    <button class="option-btn" onclick="checkAnswer(${idx + 1})">${idx + 1}. ${opt}</button>
+                `).join('')}
+            </div>
+
             <div id="result-box" class="result-area">
                 <div id="result-title" class="result-title"></div>
-                <div class="explanation-text"><strong>解説:</strong> <span id="explanation-content"></span></div>
-                <button class="next-btn" onclick="nextQuestion()">次の問題へ</button>
+                <div style="margin-top:5px; font-size:0.9rem;"><strong>解説:</strong> ${q.explanation}</div>
+                <button class="primary-btn" style="margin-top:15px; padding:12px;" onclick="nextQuestion()">次へ進む</button>
             </div>
         `;
     }
 
-    // 回答チェック
-    function checkAnswer(selectedIdx) {
-        const q = quizData[currentQuestionIndex];
+    // 判定処理
+    function checkAnswer(selected) {
+        const q = selectedQuestions[currentIdx];
         const buttons = document.querySelectorAll('.option-btn');
         const resultBox = document.getElementById('result-box');
         const resultTitle = document.getElementById('result-title');
-        const explanationContent = document.getElementById('explanation-content');
 
         buttons.forEach((btn, idx) => {
             btn.disabled = true;
-            if (idx + 1 === q.correct) {
-                btn.classList.add('correct');
-            }
+            if(idx + 1 === q.correct) btn.classList.add('correct');
         });
 
-        if (selectedIdx === q.correct) {
+        if(selected === q.correct) {
             resultBox.className = "result-area correct-box";
             resultTitle.innerText = "正解！";
         } else {
             resultBox.className = "result-area wrong-box";
             resultTitle.innerText = "不正解...";
-            buttons[selectedIdx - 1].classList.add('wrong');
+            buttons[selected - 1].classList.add('wrong');
         }
-
-        explanationContent.innerText = q.explanation;
         resultBox.style.display = 'block';
     }
 
-    // 次の問題へ
+    // 次へ
     function nextQuestion() {
-        currentQuestionIndex++;
-        if (currentQuestionIndex < quizData.length) {
+        currentIdx++;
+        if(currentIdx < selectedQuestions.length) {
             showQuestion();
         } else {
-            document.getElementById('quiz-box').innerHTML = `
+            document.getElementById('main-container').innerHTML = `
                 <div style="text-align:center; padding:20px;">
-                    <h2 style="color:var(--success-color);">全問終了です！</h2>
-                    <p>素晴らしい！この調子で繰り返し復習しましょう！</p>
-                    <button class="next-btn" onclick="location.reload()">問題選択に戻る</button>
+                    <h2 style="color:var(--success-color); margin-top:0;">演習修了！</h2>
+                    <p>設定されたすべての問題を解き終えました。</p>
+                    <button class="primary-btn" onclick="location.reload()">メニューに戻る</button>
                 </div>
             `;
         }
     }
+
+    // アプリ起動
+    window.onload = initApp;
 </script>
 
 </body>
