@@ -306,7 +306,7 @@
     let isRandomOrder = true;
 
     let startQuestionId = 1;
-    let endQuestionId = 100;
+    let endQuestionId = 107; // 🌟 100から107問に対応するよう修正
 
     async function initApp() {
         document.getElementById('main-container').innerHTML = '<h1>はりきゅう理論</h1><div class="subtitle">読み込み中...</div>';
@@ -357,14 +357,11 @@
             const id = isNaN(numericId) ? i : numericId;
 
             const question = parts[1];
-            // 空白の選択肢を取り除くガード
             const options = [parts[2], parts[3], parts[4], parts[5]].filter(opt => opt !== undefined && opt !== "");
             const correct = parseInt(parts[6], 10) || 1;
             
-            // 🌟 7列目以降（解説文の中にカンマが含まれて分裂してしまった分）をすべて結合する超防衛処理
             const explanation = parts.length >= 8 ? parts.slice(7).join(', ') : '解説はありません。';
 
-            // 最低限4つの選択肢が揃っている場合のみ登録する
             if(options.length >= 4) {
                 allQuestions.push({ id, rawId, question, options, correct, explanation });
             }
@@ -379,14 +376,14 @@
             </a>
 
             <h1>はりきゅう理論</h1>
-            <div class="subtitle">4択演習マスター</div>
+            <div class="subtitle">4択演婚マスター</div>
 
             <div class="section-box">
                 <div class="section-title">出題範囲（問番号で指定）</div>
                 <div class="range-input-group">
                     <input type="number" class="range-number-input" id="range-start" value="${startQuestionId}" min="1" oninput="startQuestionId = parseInt(this.value) || 1">
                     <span class="range-separator">～</span>
-                    <input type="number" class="range-number-input" id="range-end" value="${endQuestionId}" min="1" oninput="endQuestionId = parseInt(this.value) || 100">
+                    <input type="number" class="range-number-input" id="range-end" value="${endQuestionId}" min="1" oninput="endQuestionId = parseInt(this.value) || 107">
                 </div>
             </div>
 
